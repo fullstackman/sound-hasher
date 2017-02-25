@@ -17,39 +17,42 @@ def main():
     sourceFile = args['sourceFile']
     noiseFile = args['noiseFile']
     outputFile = args['outputFile']
-    mp3_audio = []
+    source_audio = []
+    noise_audio = []
 
     try:
-        #with open(sourceFile, "rb") as source_file:
-    		#mp3_audio = pydub.AudioSegment.from_file(source_file, format="mp3")
-        mp3_audio = pydub.AudioSegment.from_file(sourceFile, format="mp3")
+        fileFormat = sourceFile[-3:]
+        source_audio = pydub.AudioSegment.from_file(sourceFile, format=fileFormat)
     except:
         print ( "error opening the source file: %s" % (sourceFile))
         e = sys.exc_info()[0]
         print( "\tError: %s" % e )
         exit(-1)
 
-    try: 
-        #filesize = os.path.getsize(noiseFile)
-        fd = open(noiseFile, "rb")
-        usefile = True
+    try:
+        fileFormat = noiseFile[-3:]
+        noise_audio = pydub.AudioSegment.from_file(noiseFile, format=fileFormat)
     except:
         print ( "error opening the noise file: %s" % (noiseFile))
+        e = sys.exc_info()[0]
+        print( "\tError: %s" % e )
         exit(-1)
     
     #
-    mp3_audio = mp3_audio[2000:7000]
+    final_audio = source_audio[2000:7000] + noise_audio[3000:5000] + source_audio[9000:14000]
     #
     #
     if (outputFile):
         try: 
-            file_handle = mp3_audio.export(outputFile, format="mp3")
+            fileFormat = outputFile[-3:]
+            file_handle = final_audio.export(outputFile, format=fileFormat)
         except:
             print ( "error opening the output file: %s" % (outputFile))
             exit(-1)
     else:
     	outputFile = "./output%d.mp3" % random.randint(1,9999)
-    	file_handle = mp3_audio.export(outputFile, format="mp3")
+    	file_handle = final_audio.export(outputFile, format="mp3")
+    exit(0)
 # this gives a main function in Python
 if __name__ == "__main__":
     main()
