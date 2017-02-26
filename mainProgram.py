@@ -18,7 +18,7 @@ def main():
     sourceFile = args['sourceFile']
     noiseFile = args['noiseFile']
     outputFile = args['outputFile']
-    noiseFactor = args['noiseFactor']
+    noiseFactor = int(args['noiseFactor'])
     source_audio = pydub.AudioSegment.empty()
     noise_audio = pydub.AudioSegment.empty()
 
@@ -57,26 +57,33 @@ def main():
 
     # Define the noise factor
     if(noiseFactor):
+        if(noiseFactor < 0):
+            noiseFactor = random.random()
         while(noiseFactor > 1):
             noiseFactor = noiseFactor / 10
     else:
         noiseFactor = 0.6
-    #
+    # A boolean flag to safeguard against playing the noise too many
+    # times in a row
+    noiseJustUsed = False
+    
     while(currentIndex < original_length):
         percentage = 100*currentIndex/original_length
-        print ("| Progress: %d\r" % percentage),
+        print ("\tProgress: %d percent\r" % percentage),
         # Randomly pick how many seconds of the audio we will work on in
         # this step of the loop
-        nextSegment = random.randint(800,2350)
-        audioSnippet = []
-        if(random.random() < noiseFactor):
+        nextSegment = random.randint(600,2350)
+        audioSnippet = pydub.AudioSegment.empty()
+        if(random.random() < noiseFactor and noiseJustUsed == False):
             # Choose a random starting point in the noise audio
             startIndex = random.randint(0,len(noise_audio)-nextSegment)
             # Pull out a segment of the noise file
             audioSnippet = noise_audio[startIndex:startIndex+nextSegment]
+            noiseJustUsed = True
         else:
             # Pull out the next segment of the source file
             audioSnippet = source_audio[currentIndex:currentIndex+nextSegment]
+            noiseJustUsed = False
         final_audio += audioSnippet
         currentIndex += nextSegment
     #
